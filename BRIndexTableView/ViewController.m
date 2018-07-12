@@ -24,6 +24,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     tableView = [[BRIndexTableView alloc] initWithFrame:CGRectMake(0, 60, self.view.frame.size.width, self.view.frame.size.height - 60) style:UITableViewStylePlain];
+    tableView.indexViewWitdh = 30;
+    tableView.indexClickFont = [UIFont systemFontOfSize:12];
     tableView.delegate = self;
     tableView.dataSource = self;
     
@@ -65,16 +67,19 @@
     
 }
 
-- (UIColor *)indexTitlesSelectedColorForIndexTableView:(UITableView *)tableView {
+- (UIColor *)indexTitlesSelectedColorForIndexTableView:(UITableView *)tableView currentIndex:(NSInteger)currentIndex{
     return [UIColor blueColor];
 }
 
-- (UIColor *)indexTitlesColorForIndexTableView:(UITableView *)tableView {
+- (UIColor *)indexTitlesColorForIndexTableView:(UITableView *)tableView currentIndex:(NSInteger)currentIndex{
      return [UIColor lightGrayColor];
 }
 
 
-- (BOOL)indexTitlesClickSelectedForIndexTableView:(UITableView *)tableView {
+- (BOOL)indexTitlesClickSelectedForIndexTableView:(UITableView *)tableView currentIndex:(NSInteger)currentIndex{
+    if (currentIndex == 0) {
+        return NO;
+    }
     return YES;
 }
 

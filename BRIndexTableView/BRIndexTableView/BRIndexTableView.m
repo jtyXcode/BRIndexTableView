@@ -28,12 +28,39 @@
     }
 }
 
+- (void)setIndexViewWitdh:(CGFloat)indexViewWitdh {
+    _indexViewWitdh = indexViewWitdh;
+}
+
+- (void)setIndexBackgounrdColor:(UIColor *)indexBackgounrdColor {
+    _indexBackgounrdColor = indexBackgounrdColor;
+}
+
+- (void)setIndexClickFont:(UIFont *)indexClickFont {
+    _indexClickFont = indexClickFont;
+}
+
+
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation {
+    [super reloadSections:sections withRowAnimation:animation];
+    [self setContainerView];
+}
+
+- (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
+    [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+    [self setContainerView];
+    
+}
+
 - (void)reloadData {
     [super reloadData];
-    
+    [self setContainerView];
+}
+
+- (void)setContainerView {
     if (containerView == nil) {
         containerView = [[UIView alloc] initWithFrame:CGRectZero];
-        containerView.backgroundColor = [UIColor whiteColor];
+        containerView.backgroundColor = _indexBackgounrdColor == nil ? [UIColor whiteColor]  : _indexBackgounrdColor;
         [self.superview insertSubview:containerView aboveSubview:self];
     }
     
@@ -44,6 +71,7 @@
     [reuseViewPool reset];
     [self reloadIndexedBar];
 }
+
 
 - (void)reloadIndexedBar {
     NSArray <NSString *> *arrayTitles = nil;
@@ -57,7 +85,7 @@
     }
 
     NSUInteger count = arrayTitles.count;
-    CGFloat buttonWidth = 60;
+    CGFloat buttonWidth = _indexViewWitdh == 0 ? 60 : _indexViewWitdh;
     CGFloat buttonHeight = self.frame.size.height / count;
     
     _selectedButton.selected = NO;
@@ -66,6 +94,7 @@
         if (button == nil) {
             button = [[UIButton alloc] initWithFrame:CGRectZero];
             button.backgroundColor = [UIColor whiteColor];
+            button.titleLabel.font = _indexClickFont == nil ? button.titleLabel.font : _indexClickFont;
             [reuseViewPool addUsingView:button];
         }
         
@@ -80,14 +109,14 @@
         [containerView addSubview:button];
         if (_indexDataSource) {
             
-            if ([_indexDataSource respondsToSelector:@selector(indexTitlesColorForIndexTableView:)]) {
-                [button setTitleColor:[_indexDataSource indexTitlesColorForIndexTableView:self] forState:UIControlStateNormal];
+            if ([_indexDataSource respondsToSelector:@selector(indexTitlesColorForIndexTableView:currentIndex:)]) {
+                [button setTitleColor:[_indexDataSource indexTitlesColorForIndexTableView:self currentIndex:button.tag - BR_SEND_TAG] forState:UIControlStateNormal];
             }else {
                 [button setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
             }
             
-            if ([_indexDataSource respondsToSelector:@selector(indexTitlesSelectedColorForIndexTableView:)]) {
-                [button setTitleColor:[_indexDataSource indexTitlesSelectedColorForIndexTableView:self] forState:UIControlStateSelected];
+            if ([_indexDataSource respondsToSelector:@selector(indexTitlesSelectedColorForIndexTableView:currentIndex:)]) {
+                [button setTitleColor:[_indexDataSource indexTitlesSelectedColorForIndexTableView:self currentIndex:button.tag - BR_SEND_TAG] forState:UIControlStateSelected];
             }else {
                 [button setTitleColor:[UIColor yellowColor] forState:UIControlStateSelected];
             }
@@ -110,10 +139,10 @@
     if (_indexDataSource) {
         if([_indexDataSource respondsToSelector:@selector(indexTitlesForIndexTableViewClickedIndex:)]) {
             NSInteger index = sender.tag - BR_SEND_TAG;
-            [_indexDataSource indexTitlesForIndexTableViewClickedIndex:index];
+            [_indexDataSource indexTitlesForIndexTableViewClickedIndex:index ];
         }
       
-        if ([_indexDataSource respondsToSelector:@selector(indexTitlesClickSelectedForIndexTableView:)]) {
+        if ([_indexDataSource respondsToSelector:@selector(indexTitlesClickSelectedForIndexTableView:currentIndex:)]) {
             [self selectedClicked:sender];
         }
     }
@@ -121,7 +150,7 @@
 }
 
 - (void)selectedClicked:(UIButton *)sender {
-    if ([_indexDataSource indexTitlesClickSelectedForIndexTableView:self]) {
+    if ([_indexDataSource indexTitlesClickSelectedForIndexTableView:self currentIndex:sender.tag - BR_SEND_TAG]) {
         _selectedButton.selected = NO;
         sender.selected = !sender.isSelected;
         _selectedButton = sender;
